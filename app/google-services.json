@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "982070038672",
+    "firebase_url": "https://cmstalk-7a91e.firebaseio.com",
+    "project_id": "cmstalk-7a91e",
+    "storage_bucket": "cmstalk-7a91e.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:982070038672:android:a3692fbcf603c997",
+        "android_client_info": {
+          "package_name": "com.csergio.cmstalk"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "982070038672-4em3467tq5u89cj4bekr5enju9fh4st3.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.csergio.cmstalk",
+            "certificate_hash": "0bd90b39e86ecb0a5754f02d16d392e124438956"
+          }
+        },
+        {
+          "client_id": "982070038672-9j1nvp6gb5502i70cqfd5rvcaqadqugq.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDRLopeTxiMvAIpsCQvOYE1Kapy9Et750M"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "982070038672-9j1nvp6gb5502i70cqfd5rvcaqadqugq.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
