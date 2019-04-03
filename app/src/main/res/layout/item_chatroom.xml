@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              xmlns:app="http://schemas.android.com/apk/res-auto"
+              xmlns:tools="http://schemas.android.com/tools"
+              android:layout_width="match_parent"
+              android:layout_height="70dp" android:gravity="center_vertical">
+
+    <ImageView
+            android:layout_width="50dp"
+            android:layout_height="50dp" app:srcCompat="@mipmap/ic_launcher_round"
+            android:id="@+id/chatItem_imageView"
+            android:layout_margin="10dp"
+    />
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" android:gravity="center_vertical">
+        <TextView
+                android:text="이름"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:id="@+id/chatItem_textView_title"
+        />
+        <TextView
+                android:text="마지막 메시지"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content" android:id="@+id/chatItem_textView_lastMessage"
+                android:layout_marginTop="10dp"/>
+    </LinearLayout>
+</LinearLayout>

@@ -3,7 +3,6 @@ package com.csergio.cmstalk.fragment
 import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,11 +14,11 @@ import com.bumptech.glide.request.RequestOptions
 import com.csergio.cmstalk.R
 import com.csergio.cmstalk.chat.MessageActivity
 import com.csergio.cmstalk.model.UserModel
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import kotlinx.android.synthetic.main.fragment_people.*
 import kotlinx.android.synthetic.main.fragment_people.view.*
 import kotlinx.android.synthetic.main.item_friend.view.*
 
@@ -30,24 +29,33 @@ class PeopleFragment:Fragment() {
         val view = inflater.inflate(R.layout.fragment_people, container, false)
 
         view.peopleFragment_recyclerView.layoutManager = LinearLayoutManager(this.context)
-        view.peopleFragment_recyclerView.adapter = MyAdapter()
+        view.peopleFragment_recyclerView.adapter = PeopleFragmentAdapter()
 
         return view
     }
 
-    inner class MyAdapter: RecyclerView.Adapter<MyViewHolder>{
+    inner class PeopleFragmentAdapter: RecyclerView.Adapter<PeopleFragmentViewHolder>{
 
-        private val userModels = mutableListOf<UserModel>()
+        val userModels = mutableListOf<UserModel>()
 
         constructor(){
             FirebaseDatabase.getInstance().getReference("users").addValueEventListener(object : ValueEventListener{
+
+                val myUid = FirebaseAuth.getInstance().currentUser?.uid
+
                 override fun onCancelled(databaseError: DatabaseError) {
                 }
 
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     userModels.clear()
                     for (snapshot in dataSnapshot.children){
-                        userModels.add(snapshot.getValue(UserModel::class.java)!!)
+                        val userModel = snapshot.getValue(UserModel::class.java)
+                        userModel?.let {
+                            // 내 데이터는 친구 목록에 안 나오게 처리
+                            if (userModel.uid != myUid){
+                                userModels.add(userModel)
+                            }
+                        }
                     }
                     notifyDataSetChanged()
                 }
@@ -55,16 +63,16 @@ class PeopleFragment:Fragment() {
             })
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MyViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PeopleFragmentViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_friend, parent, false)
-            return MyViewHolder(view)
+            return PeopleFragmentViewHolder(view)
         }
 
         override fun getItemCount(): Int {
             return userModels.size
         }
 
-        override fun onBindViewHolder(holder: MyViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: PeopleFragmentViewHolder, position: Int) {
             Glide.with(holder.itemView.context)
                 .load(userModels[position].profileImageUri)
                 .apply { RequestOptions.circleCropTransform() }
@@ -73,13 +81,14 @@ class PeopleFragment:Fragment() {
             holder.textView.text = userModels[position].userName
             holder.itemView.setOnClickListener {
                 val intent = Intent(it.context, MessageActivity::class.java)
+                intent.putExtra("receiverUid", userModels[position].uid)
                 val activityOptions = ActivityOptions.makeCustomAnimation(it.context, R.anim.appear_from_right, R.anim.disappear_to_right)
                 startActivity(intent, activityOptions.toBundle())
             }
         }
     }
 
-    inner class MyViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+    inner class PeopleFragmentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         val imageView = itemView.item_friend_imageView
         val textView = itemView.item_friend_textView
     }
