@@ -5,5 +5,7 @@ class UserModel {
     var userName = ""
     var profileImageUri = ""
     var uid = ""
+    var pushToken = ""
+    var statusMessage = ""
 
 }

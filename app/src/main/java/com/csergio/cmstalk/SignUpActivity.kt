@@ -17,6 +17,7 @@ import com.google.android.gms.tasks.OnCompleteListener
 import com.google.android.gms.tasks.Task
 import com.google.firebase.auth.AuthResult
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.UserProfileChangeRequest
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.remoteconfig.FirebaseRemoteConfig
 import com.google.firebase.storage.FirebaseStorage
@@ -62,6 +63,9 @@ class SignUpActivity : AppCompatActivity() {
                 .addOnCompleteListener(this, OnCompleteListener {
 
                     val uid = it.result?.user?.uid.toString()
+
+                    val userProfileChangeRequest = UserProfileChangeRequest.Builder().setDisplayName(signUpActivity_editText_name.text.toString()).build()
+                    it.result?.user?.updateProfile(userProfileChangeRequest)
 
                     // 프로필 이미지 선택했을 때
                     if (imageUri.toString() != ""){

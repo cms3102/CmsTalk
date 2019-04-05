@@ -9,4 +9,11 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" app:layout_constraintBottom_toBottomOf="parent"
             android:id="@+id/peopleFragment_recyclerView"/>
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:clickable="true" app:srcCompat="@android:drawable/stat_notify_chat"
+            android:id="@+id/peopleFragment_floatingActionButton"
+            app:layout_constraintEnd_toEndOf="parent" android:layout_marginEnd="16dp"
+            android:layout_marginBottom="16dp" app:layout_constraintBottom_toBottomOf="parent" app:fabSize="normal"/>
 </androidx.constraintlayout.widget.ConstraintLayout>

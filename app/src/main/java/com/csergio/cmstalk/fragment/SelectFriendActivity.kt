@@ -2,51 +2,59 @@ package com.csergio.cmstalk.fragment
 
 import android.app.ActivityOptions
 import android.content.Intent
+import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.csergio.cmstalk.R
 import com.csergio.cmstalk.chat.MessageActivity
+import com.csergio.cmstalk.model.ChatRoomModel
 import com.csergio.cmstalk.model.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-import kotlinx.android.synthetic.main.fragment_people.view.*
+import kotlinx.android.synthetic.main.activity_select_friend.*
 import kotlinx.android.synthetic.main.item_friend.view.*
+import kotlinx.android.synthetic.main.item_friend_selected.view.*
 
-class PeopleFragment:Fragment() {
+class SelectFriendActivity : AppCompatActivity() {
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+    private val chatRoomModel = ChatRoomModel()
+    private val myUid = FirebaseAuth.getInstance().currentUser?.uid
 
-        val view = inflater.inflate(R.layout.fragment_people, container, false)
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_select_friend)
 
-        view.peopleFragment_recyclerView.layoutManager = LinearLayoutManager(this.context)
-        view.peopleFragment_recyclerView.adapter = PeopleFragmentAdapter()
+        selectFriendActivity_recyclerView.layoutManager = LinearLayoutManager(this)
+        selectFriendActivity_recyclerView.adapter = SelectFragmentAdapter()
 
-        view.peopleFragment_floatingActionButton.setOnClickListener {
-            startActivity(Intent(view.context, SelectFriendActivity::class.java))
+        selectFriendAtivity_button.setOnClickListener {
+            chatRoomModel.members[myUid.toString()] = true
+            FirebaseDatabase.getInstance().getReference("chatRooms").push().setValue(chatRoomModel)
         }
-
-        return view
     }
 
-    inner class PeopleFragmentAdapter: RecyclerView.Adapter<PeopleFragmentViewHolder>{
+    inner class SelectFragmentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
+        val imageView = itemView.item_friend_selected_imageView
+        val textView = itemView.item_friend_selected_textView
+        val textView_statusMessage = itemView.item_friend_selected_textView_comment
+        val checkBox = itemView.item_friend_selected_checkBox
+    }
+
+    inner class SelectFragmentAdapter: RecyclerView.Adapter<SelectFragmentViewHolder>{
 
         val userModels = mutableListOf<UserModel>()
 
         constructor(){
-            FirebaseDatabase.getInstance().getReference("users").addValueEventListener(object : ValueEventListener{
-
-                val myUid = FirebaseAuth.getInstance().currentUser?.uid
+            FirebaseDatabase.getInstance().getReference("users").addValueEventListener(object : ValueEventListener {
 
                 override fun onCancelled(databaseError: DatabaseError) {
                 }
@@ -68,16 +76,16 @@ class PeopleFragment:Fragment() {
             })
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): PeopleFragmentViewHolder {
-            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_friend, parent, false)
-            return PeopleFragmentViewHolder(view)
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SelectFragmentViewHolder {
+            val view = LayoutInflater.from(parent.context).inflate(R.layout.item_friend_selected, parent, false)
+            return SelectFragmentViewHolder(view)
         }
 
         override fun getItemCount(): Int {
             return userModels.size
         }
 
-        override fun onBindViewHolder(holder: PeopleFragmentViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: SelectFragmentViewHolder, position: Int) {
             Glide.with(holder.itemView.context)
                 .load(userModels[position].profileImageUri)
                 .apply { RequestOptions.circleCropTransform() }
@@ -91,12 +99,15 @@ class PeopleFragment:Fragment() {
                 startActivity(intent, activityOptions.toBundle())
             }
             holder.textView_statusMessage.text = userModels[position].statusMessage
+            holder.checkBox.setOnCheckedChangeListener {
+                    buttonView, isChecked ->
+                val key = userModels[position].uid
+                if (isChecked){
+                    chatRoomModel.members[key] = true
+                } else {
+                    chatRoomModel.members.remove(key)
+                }
+            }
         }
-    }
-
-    inner class PeopleFragmentViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-        val imageView = itemView.item_friend_imageView
-        val textView = itemView.item_friend_textView
-        val textView_statusMessage = itemView.item_friend_textView_comment
     }
 }

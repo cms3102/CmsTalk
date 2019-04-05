@@ -12,6 +12,7 @@ class ChatRoomModel {
         var uid = ""
         var message = ""
         var timestamp:Any? = null
+        var readMembers: MutableMap<String, Any> = mutableMapOf()
     }
 
 }

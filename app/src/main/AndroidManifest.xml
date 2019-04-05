@@ -9,6 +9,20 @@
             android:roundIcon="@mipmap/ic_launcher_round"
             android:supportsRtl="true"
             android:theme="@style/AppTheme">
+        <activity android:name=".chat.GroupChatActivity">
+        </activity>
+        <activity android:name=".fragment.SelectFriendActivity">
+        </activity>
+
+        <service
+                android:name=".MyFirebaseMessagingService"
+                android:enabled="true"
+                android:exported="true">
+            <intent-filter>
+                <action android:name="com.google.firebase.MESSAGING_EVENT"/>
+            </intent-filter>
+        </service>
+
         <activity android:name=".chat.MessageActivity">
         </activity>
         <activity android:name=".SignUpActivity">

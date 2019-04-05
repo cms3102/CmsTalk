@@ -14,33 +14,39 @@
             android:layout_marginStart="8dp" tools:layout_editor_absoluteY="0dp"
             app:layout_constraintHorizontal_bias="1.0">
 
+        <CheckBox
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" android:id="@+id/item_friend_selected_checkBox"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" android:layout_marginBottom="8dp"
+                app:layout_constraintBottom_toBottomOf="parent"/>
         <ImageView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 app:srcCompat="@mipmap/ic_launcher_round"
-                android:id="@+id/item_friend_imageView"
-                app:layout_constraintStart_toStartOf="parent"
+                android:id="@+id/item_friend_selected_imageView"
                 app:layout_constraintTop_toTopOf="parent"
                 android:adjustViewBounds="true"
                 android:padding="8dp"
                 app:layout_constraintBottom_toBottomOf="parent"
-                android:layout_marginTop="8dp" android:layout_marginBottom="8dp"/>
+                android:layout_marginTop="8dp" android:layout_marginBottom="8dp"
+                app:layout_constraintStart_toEndOf="@+id/item_friend_selected_checkBox" android:layout_marginStart="8dp"/>
         <TextView
                 android:text="아이디"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:id="@+id/item_friend_textView"
-                app:layout_constraintTop_toTopOf="@+id/item_friend_imageView"
-                app:layout_constraintBottom_toBottomOf="@+id/item_friend_imageView"
-                app:layout_constraintStart_toEndOf="@+id/item_friend_imageView" android:layout_marginStart="8dp"/>
+                android:id="@+id/item_friend_selected_textView"
+                app:layout_constraintTop_toTopOf="@+id/item_friend_selected_imageView"
+                app:layout_constraintBottom_toBottomOf="@+id/item_friend_selected_imageView"
+                app:layout_constraintStart_toEndOf="@+id/item_friend_selected_imageView" android:layout_marginStart="8dp"/>
         <TextView
                 android:text="상태 메시지"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
-                android:id="@+id/item_friend_textView_comment" app:layout_constraintEnd_toEndOf="parent"
+                android:id="@+id/item_friend_selected_textView_comment" app:layout_constraintEnd_toEndOf="parent"
                 android:layout_marginEnd="16dp"
-                app:layout_constraintStart_toEndOf="@+id/item_friend_textView" android:layout_marginStart="32dp"
-                app:layout_constraintTop_toTopOf="@+id/item_friend_textView"
-                app:layout_constraintBottom_toBottomOf="@+id/item_friend_textView"/>
+                app:layout_constraintStart_toEndOf="@+id/item_friend_selected_textView" android:layout_marginStart="32dp"
+                app:layout_constraintTop_toTopOf="@+id/item_friend_selected_textView"
+                app:layout_constraintBottom_toBottomOf="@+id/item_friend_selected_textView"/>
     </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.constraintlayout.widget.ConstraintLayout>

@@ -2,6 +2,7 @@ package com.csergio.cmstalk.chat
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.View
@@ -18,6 +19,7 @@ import com.csergio.cmstalk.model.UserModel
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
 import com.google.gson.Gson
+import kotlinx.android.synthetic.main.activity_group_chat.*
 import kotlinx.android.synthetic.main.activity_message.*
 import kotlinx.android.synthetic.main.item_message.view.*
 import okhttp3.*
@@ -25,72 +27,91 @@ import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.*
 
-class MessageActivity : AppCompatActivity() {
+class GroupChatActivity : AppCompatActivity() {
 
-    private var uid = ""
-    private var receiverUid = ""
-    private var chatRoomId = ""
+    val usersMap = mutableMapOf<String, UserModel?>()
+    var targetRoomId = ""
+    var uid = ""
 
-    private lateinit var destinationUserModel:UserModel
     private lateinit var databaseRef:DatabaseReference
-    private var valueEventListener: ValueEventListener? = null
+    private lateinit var valueEventListener:ValueEventListener
+
+    private val comments = mutableListOf<ChatRoomModel.Comment>()
+
     private var peopleCount = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_message)
+        setContentView(R.layout.activity_group_chat)
 
-        uid = FirebaseAuth.getInstance().currentUser!!.uid
-        receiverUid = intent.getStringExtra("receiverUid")
+        targetRoomId = intent.getStringExtra("targetRoomId")
+        uid = FirebaseAuth.getInstance().currentUser?.uid.toString()
 
-        // 현재 들어온 방의 아이디를 찾아서 변수에 저장
-        checkChatRoom()
-
-        messageActivity_button.setOnClickListener {
-            val chatRoomModel = ChatRoomModel()
-            chatRoomModel.members[uid] = true
-            chatRoomModel.members[receiverUid] = true
-
-            // 메시지 전송 요청 후 처리 완료 전까지 전송 버튼 클릭 안 되게 처리
-            messageActivity_button.isClickable = false
-
-            if (chatRoomId == ""){
-                FirebaseDatabase.getInstance().getReference("chatRooms").push().setValue(chatRoomModel).addOnSuccessListener {
-                    checkChatRoom()
-                }
-            } else {
-                saveCommentToDB()
+        FirebaseDatabase.getInstance().getReference("users").addListenerForSingleValueEvent(object : ValueEventListener{
+            override fun onCancelled(error: DatabaseError) {
             }
 
-            // 메시지 전송 처리 후 다시 전송 버튼 클릭 가능하게 처리
-            messageActivity_button.isClickable = true
+            override fun onDataChange(snapshot: DataSnapshot) {
+//              usersMap = snapshot.value as MutableMap<String, UserModel>
+                for (item in snapshot.children){
+                    usersMap[item.key.toString()] = item.getValue(UserModel::class.java)
+                }
 
-        }
+                init()
+            }
+
+        })
+
     }
 
-    // 보낸 메시지 DB 저장
-    private fun saveCommentToDB() {
-        val message = messageActivity_editText.text.toString()
-        // 메시지 내용이 있을 때만 서버로 전송
-        if (message != ""){
+    fun init() {
+        groupChatActivity_button.setOnClickListener {
             val comment = ChatRoomModel.Comment()
             comment.uid = uid
-            comment.message = message
+            comment.message = groupChatActivity_editText.text.toString()
             comment.timestamp = ServerValue.TIMESTAMP
-            FirebaseDatabase.getInstance().getReference("chatRooms/$chatRoomId").child("comments").push().setValue(comment).addOnSuccessListener {
-                sendGcm()
-                messageActivity_editText.text?.clear()
+            FirebaseDatabase.getInstance().getReference("chatRooms/$targetRoomId/comments").push().setValue(comment).addOnCompleteListener {
+                FirebaseDatabase.getInstance().getReference("chatRooms/$targetRoomId/members").addListenerForSingleValueEvent(object :ValueEventListener{
+
+                    override fun onCancelled(error: DatabaseError) {
+                    }
+
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        val map = snapshot.value as MutableMap<String, Boolean>
+                        for (item in map.keys){
+                            if (item == uid){
+                                continue
+                            }
+                            sendGcm(usersMap[item]?.pushToken.toString())
+                            groupChatActivity_editText.text?.clear()
+                        }
+                    }
+
+                })
             }
         }
+        groupChatActivity_recyclerView.adapter = GroupChatAdapter()
+        groupChatActivity_recyclerView.layoutManager = LinearLayoutManager(this@GroupChatActivity)
+    }
+
+    inner class GroupChatViewHolder(itemView:View):RecyclerView.ViewHolder(itemView){
+        val textView_message = itemView.item_message_textView
+        val textView_name = itemView.item_message_textView_name
+        val imageView_profile = itemView.item_message_imageView_profile
+        val linearLayout_receiver = itemView.item_message_linearLayout_receiver
+        val linearLayout_main = itemView.item_message_linearLayout_main
+        val textView_timestamp = itemView.item_message_textView_timestamp
+        val textView_readCountLeft = itemView.item_message_textView_readCount_left
+        val textView_readCountRight = itemView.item_message_textView_readCount_right
     }
 
     // 채팅 내용 클라우드 메시징으로 보내기
-    fun sendGcm() {
+    fun sendGcm(pushToken:String) {
         val gson = Gson()
 
         val userName = FirebaseAuth.getInstance().currentUser?.displayName
         val notificationModel = NotificationModel()
-        notificationModel.to = destinationUserModel.pushToken
+        notificationModel.to = pushToken
         notificationModel.notification.title = userName.toString()
         notificationModel.notification.text = messageActivity_editText.text.toString()
         notificationModel.data.title = userName.toString()
@@ -105,7 +126,7 @@ class MessageActivity : AppCompatActivity() {
             .build()
 
         val okHttpClient = OkHttpClient()
-        okHttpClient.newCall(request).enqueue(object :Callback{
+        okHttpClient.newCall(request).enqueue(object : Callback {
             override fun onFailure(call: Call, e: IOException) {
             }
 
@@ -116,64 +137,15 @@ class MessageActivity : AppCompatActivity() {
 
     }
 
-    // 선택한 상대와 대화하던 방이 있는지 확인
-    private fun checkChatRoom(){
-        // 내가 들어 있는 방들을 가져온다
-        FirebaseDatabase.getInstance().getReference("chatRooms").orderByChild("members/$uid").equalTo(true).addListenerForSingleValueEvent(object:ValueEventListener{
-            override fun onCancelled(error: DatabaseError) {
-            }
-
-            override fun onDataChange(snapshot: DataSnapshot) {
-                for (item in snapshot.children){
-                    val chatRoomModel = item.getValue(ChatRoomModel::class.java)
-                    chatRoomModel?.let {
-                        // 내가 들어가 있는 방 중에서 지금 내가 선택한 사람이 들어있는 방을 찾아서 방 아이디를 저장
-                        if (chatRoomModel.members.containsKey(receiverUid) && chatRoomModel.members.size == 2){
-                            chatRoomId = item.key!!
-                            saveCommentToDB()
-                            messageActivity_recyclerView.layoutManager = LinearLayoutManager(this@MessageActivity)
-                            messageActivity_recyclerView.adapter = MessageActivityAdapter()
-                        }
-                    }
-                }
-            }
-
-        })
-    }
-
-    inner class MessageActivityViewHolder(itemView:View):RecyclerView.ViewHolder(itemView){
-        val textView_message = itemView.item_message_textView
-        val textView_name = itemView.item_message_textView_name
-        val imageView_profile = itemView.item_message_imageView_profile
-        val linearLayout_receiver = itemView.item_message_linearLayout_receiver
-        val linearLayout_main = itemView.item_message_linearLayout_main
-        val textView_timestamp = itemView.item_message_textView_timestamp
-        val textView_readCountLeft = itemView.item_message_textView_readCount_left
-        val textView_readCountRight = itemView.item_message_textView_readCount_right
-    }
-
-    inner class MessageActivityAdapter:RecyclerView.Adapter<MessageActivityViewHolder>{
-
-        private val comments = mutableListOf<ChatRoomModel.Comment>()
+    inner class GroupChatAdapter:RecyclerView.Adapter<GroupChatViewHolder>{
 
         constructor(){
-            FirebaseDatabase.getInstance().getReference("users").child(receiverUid).addListenerForSingleValueEvent(object :ValueEventListener{
-                override fun onCancelled(error: DatabaseError) {
-                }
-
-                override fun onDataChange(snapshot: DataSnapshot) {
-                    snapshot.getValue(UserModel::class.java)?.let {
-                        destinationUserModel = it
-                        getMessageList()
-                    }
-                }
-
-            })
+            getMessageList()
         }
 
         // 대화 내용 불러오기
         fun getMessageList() {
-            databaseRef = FirebaseDatabase.getInstance().getReference("chatRooms/$chatRoomId").child("comments")
+            databaseRef = FirebaseDatabase.getInstance().getReference("chatRooms/$targetRoomId").child("comments")
             valueEventListener = databaseRef.addValueEventListener(object :ValueEventListener{
                 override fun onCancelled(error: DatabaseError) {
                 }
@@ -196,18 +168,18 @@ class MessageActivity : AppCompatActivity() {
 
                     // 마지막 메시지의 읽은 사람 목록에 내가 없으면 서버로 읽었다고 업데이트
                     if (!comments[comments.size - 1].readMembers.containsKey(uid)){
-                        FirebaseDatabase.getInstance().getReference("chatRooms").child(chatRoomId).child("comments")
+                        FirebaseDatabase.getInstance().getReference("chatRooms").child(targetRoomId).child("comments")
                             .updateChildren(readMembers).addOnCompleteListener {
                                 // 데이터 새로 고침
                                 notifyDataSetChanged()
                                 // 마지막 항목으로 스크롤 조정
-                                messageActivity_recyclerView.scrollToPosition(comments.size - 1)
+                                groupChatActivity_recyclerView.scrollToPosition(comments.size - 1)
                             }
                     } else {
                         // 데이터 새로 고침
                         notifyDataSetChanged()
                         // 마지막 항목으로 스크롤 조정
-                        messageActivity_recyclerView.scrollToPosition(comments.size - 1)
+                        groupChatActivity_recyclerView.scrollToPosition(comments.size - 1)
                     }
 
                 }
@@ -215,17 +187,16 @@ class MessageActivity : AppCompatActivity() {
             })
         }
 
-        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): MessageActivityViewHolder {
+        override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GroupChatViewHolder {
             val view = LayoutInflater.from(parent.context).inflate(R.layout.item_message, parent, false)
-
-            return MessageActivityViewHolder(view)
+            return GroupChatViewHolder(view)
         }
 
         override fun getItemCount(): Int {
             return comments.size
         }
 
-        override fun onBindViewHolder(holder: MessageActivityViewHolder, position: Int) {
+        override fun onBindViewHolder(holder: GroupChatViewHolder, position: Int) {
             // 내가 보낸 메시지
             if (comments[position].uid == uid){
                 holder.textView_message.text = comments[position].message
@@ -233,13 +204,13 @@ class MessageActivity : AppCompatActivity() {
                 holder.linearLayout_receiver.visibility = View.INVISIBLE
                 holder.linearLayout_main.gravity = Gravity.RIGHT
                 setReadCount(position, holder.textView_readCountLeft)
-            // 상대방이 보낸 메시지
+                // 상대방이 보낸 메시지
             } else {
                 Glide.with(holder.itemView.context)
-                    .load(destinationUserModel.profileImageUri)
+                    .load(usersMap[comments[position].uid]?.profileImageUri)
                     .apply(RequestOptions.centerCropTransform())
                     .into(holder.imageView_profile)
-                holder.textView_name.text = destinationUserModel.userName
+                holder.textView_name.text = usersMap[comments[position].uid]?.userName
                 holder.linearLayout_receiver.visibility = View.VISIBLE
                 holder.textView_message.setBackgroundResource(R.drawable.leftbubble)
                 holder.textView_message.text = comments[position].message
@@ -258,7 +229,7 @@ class MessageActivity : AppCompatActivity() {
         // 메시지 안 읽은 인원 수 표시
         private fun setReadCount(position: Int, textView: TextView) {
             if (peopleCount == 0){
-                FirebaseDatabase.getInstance().getReference("chatRooms/$chatRoomId/members").addListenerForSingleValueEvent(object : ValueEventListener{
+                FirebaseDatabase.getInstance().getReference("chatRooms/$targetRoomId/members").addListenerForSingleValueEvent(object : ValueEventListener{
                     override fun onCancelled(error: DatabaseError) {
                     }
 
@@ -287,14 +258,4 @@ class MessageActivity : AppCompatActivity() {
         }
 
     }
-
-    override fun onBackPressed() {
-        valueEventListener?.let {
-            databaseRef.removeEventListener(it)
-        }
-        finish()
-        // 뒤로 가기 버튼 눌렀을 때 애니메이션 세팅
-        overridePendingTransition(R.anim.appear_from_left, R.anim.disappear_to_right)
-    }
-
 }
