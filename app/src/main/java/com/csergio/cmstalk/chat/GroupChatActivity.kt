@@ -113,9 +113,9 @@ class GroupChatActivity : AppCompatActivity() {
         val notificationModel = NotificationModel()
         notificationModel.to = pushToken
         notificationModel.notification.title = userName.toString()
-        notificationModel.notification.text = messageActivity_editText.text.toString()
+        notificationModel.notification.text = groupChatActivity_editText.text.toString()
         notificationModel.data.title = userName.toString()
-        notificationModel.data.text = messageActivity_editText.text.toString()
+        notificationModel.data.text = groupChatActivity_editText.text.toString()
 
         val requestBody = RequestBody.create(MediaType.parse("application/json; charset=utf8"), gson.toJson(notificationModel))
         val request = Request.Builder()
