@@ -258,4 +258,13 @@ class GroupChatActivity : AppCompatActivity() {
         }
 
     }
+
+    override fun onBackPressed() {
+        valueEventListener?.let {
+            databaseRef.removeEventListener(it)
+        }
+        finish()
+        // 뒤로 가기 버튼 눌렀을 때 애니메이션 세팅
+        overridePendingTransition(R.anim.appear_from_left, R.anim.disappear_to_right)
+    }
 }

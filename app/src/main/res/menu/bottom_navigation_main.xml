@@ -3,12 +3,15 @@
 
     <item android:id="@+id/action_people"
           android:icon="@drawable/baseline_people_24"
-          android:title="People"/>
+          android:title="친구 목록"/>
     <item android:id="@+id/action_chat"
           android:icon="@drawable/baseline_chat_black_24"
-          android:title="Chat"/>
+          android:title="대화방"/>
     <item android:id="@+id/action_account"
           android:icon="@drawable/baseline_account_circle_black_24"
-          android:title="Account"/>
+          android:title="계정 정보"/>
+    <!--<item android:id="@+id/action_etc"-->
+          <!--android:title="기타"-->
+          <!--android:icon="@drawable/googleg_standard_color_18"/>-->
 
 </menu>
