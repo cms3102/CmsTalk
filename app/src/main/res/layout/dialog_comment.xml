@@ -6,7 +6,7 @@
 
     <ImageView
             android:layout_width="0dp"
-            android:layout_height="64dp" app:srcCompat="@drawable/splash"
+            android:layout_height="64dp" app:srcCompat="@drawable/logo"
             android:id="@+id/imageView3" android:background="#FFFFBB33"
             android:adjustViewBounds="true" app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"

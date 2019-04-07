@@ -243,7 +243,6 @@ class MessageActivity : AppCompatActivity() {
                 holder.linearLayout_receiver.visibility = View.VISIBLE
                 holder.textView_message.setBackgroundResource(R.drawable.leftbubble)
                 holder.textView_message.text = comments[position].message
-                holder.textView_message.textSize = 25F
                 holder.linearLayout_main.gravity = Gravity.LEFT
                 setReadCount(position, holder.textView_readCountRight)
             }

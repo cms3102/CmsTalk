@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.os.Handler
 import android.view.WindowManager
 import android.widget.Toast
 import androidx.appcompat.app.AlertDialog
@@ -32,12 +33,12 @@ class SplashActivity : AppCompatActivity() {
         remoteConfig.fetch(0)
             .addOnCompleteListener(this) { task ->
                 if (task.isSuccessful) {
-                    Toast.makeText(this, "Fetch Succeeded",
-                        Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(this, "Fetch Succeeded",
+//                        Toast.LENGTH_SHORT).show()
                     remoteConfig.activateFetched()
                 } else {
-                    Toast.makeText(this, "Fetch Failed",
-                        Toast.LENGTH_SHORT).show()
+//                    Toast.makeText(this, "Fetch Failed",
+//                        Toast.LENGTH_SHORT).show()
                 }
                 displayWelcomeMessage()
             }
