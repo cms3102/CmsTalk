@@ -147,6 +147,7 @@ class GroupChatActivity : AppCompatActivity() {
         fun getMessageList() {
             databaseRef = FirebaseDatabase.getInstance().getReference("chatRooms/$targetRoomId").child("comments")
             valueEventListener = databaseRef.addValueEventListener(object :ValueEventListener{
+
                 override fun onCancelled(error: DatabaseError) {
                 }
 
@@ -167,7 +168,7 @@ class GroupChatActivity : AppCompatActivity() {
                     }
 
                     // 마지막 메시지의 읽은 사람 목록에 내가 없으면 서버로 읽었다고 업데이트
-                    if (!comments[comments.size - 1].readMembers.containsKey(uid)){
+                    if (snapshot.childrenCount != 0L && !comments[comments.size - 1].readMembers.containsKey(uid)){
                         FirebaseDatabase.getInstance().getReference("chatRooms").child(targetRoomId).child("comments")
                             .updateChildren(readMembers).addOnCompleteListener {
                                 // 데이터 새로 고침

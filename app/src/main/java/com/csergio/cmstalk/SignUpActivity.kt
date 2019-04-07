@@ -86,7 +86,7 @@ class SignUpActivity : AppCompatActivity() {
                                     userModel.userName = signUpActivity_editText_name.text.toString()
                                     userModel.profileImageUri = downloadUri
                                     FirebaseDatabase.getInstance().getReference("users/$uid").setValue(userModel)
-                                Toast.makeText(this, "이름, 아이디, 사진 DB 저장됨", Toast.LENGTH_LONG).show()
+//                                Toast.makeText(this, "이름, 아이디, 사진 DB 저장됨", Toast.LENGTH_LONG).show()
                                 finish()
                             } else {
                                 Toast.makeText(this, "실패", Toast.LENGTH_LONG).show()
@@ -98,7 +98,7 @@ class SignUpActivity : AppCompatActivity() {
                         userModel.uid = uid
                         userModel.userName = signUpActivity_editText_name.text.toString()
                         FirebaseDatabase.getInstance().getReference("users/$uid").setValue(userModel)
-                        Toast.makeText(this, "이름, 아이디 DB 저장됨", Toast.LENGTH_LONG).show()
+//                        Toast.makeText(this, "이름, 아이디 DB 저장됨", Toast.LENGTH_LONG).show()
                         finish()
                     }
                 })

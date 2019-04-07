@@ -3,9 +3,11 @@ package com.csergio.cmstalk.fragment
 import android.app.ActivityOptions
 import android.content.Intent
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -28,11 +30,13 @@ import java.util.*
 
 class ChatFragment:Fragment() {
 
+    private val chatFragmentAdapter = ChatFragmentAdapter()
+
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
 
         val view = inflater.inflate(R.layout.fragment_chat, container, false)
         view.chatFragment_recyclerView.layoutManager = LinearLayoutManager(inflater.context)
-        view.chatFragment_recyclerView.adapter = ChatFragmentAdapter()
+        view.chatFragment_recyclerView.adapter = chatFragmentAdapter
 
         return view
     }
@@ -53,6 +57,11 @@ class ChatFragment:Fragment() {
 
         constructor(){
             uid = FirebaseAuth.getInstance().currentUser!!.uid
+            getMessageList()
+        }
+
+        // 대화 내용 받아오기
+        fun getMessageList(){
             FirebaseDatabase.getInstance().getReference("chatRooms").orderByChild("members/$uid").equalTo(true).addListenerForSingleValueEvent(object:ValueEventListener{
                 override fun onCancelled(error: DatabaseError) {
                 }
@@ -140,6 +149,12 @@ class ChatFragment:Fragment() {
 
         }
 
+    }
+
+    override fun onStart() {
+        super.onStart()
+        // 대화방 정보 새로 고침
+        chatFragmentAdapter.getMessageList()
     }
 
 }

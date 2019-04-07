@@ -12,6 +12,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.bumptech.glide.request.RequestOptions
 import com.csergio.cmstalk.R
+import com.csergio.cmstalk.chat.GroupChatActivity
 import com.csergio.cmstalk.chat.MessageActivity
 import com.csergio.cmstalk.model.ChatRoomModel
 import com.csergio.cmstalk.model.UserModel
@@ -38,7 +39,13 @@ class SelectFriendActivity : AppCompatActivity() {
 
         selectFriendAtivity_button.setOnClickListener {
             chatRoomModel.members[myUid.toString()] = true
-            FirebaseDatabase.getInstance().getReference("chatRooms").push().setValue(chatRoomModel)
+            val ref = FirebaseDatabase.getInstance().getReference("chatRooms").push().ref
+                ref.setValue(chatRoomModel).addOnSuccessListener {
+                    val intent = Intent(this@SelectFriendActivity, GroupChatActivity::class.java)
+                    intent.putExtra("targetRoomId", ref.key)
+                    startActivity(intent)
+                    finish()
+                }
         }
     }
 
@@ -92,12 +99,6 @@ class SelectFriendActivity : AppCompatActivity() {
                 .into(holder.imageView)
 
             holder.textView.text = userModels[position].userName
-            holder.itemView.setOnClickListener {
-                val intent = Intent(it.context, MessageActivity::class.java)
-                intent.putExtra("receiverUid", userModels[position].uid)
-                val activityOptions = ActivityOptions.makeCustomAnimation(it.context, R.anim.appear_from_right, R.anim.disappear_to_right)
-                startActivity(intent, activityOptions.toBundle())
-            }
             holder.textView_statusMessage.text = userModels[position].statusMessage
             holder.checkBox.setOnCheckedChangeListener {
                     buttonView, isChecked ->
