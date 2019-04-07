@@ -237,7 +237,7 @@ class MessageActivity : AppCompatActivity() {
             } else {
                 Glide.with(holder.itemView.context)
                     .load(destinationUserModel.profileImageUri)
-                    .apply(RequestOptions.centerCropTransform())
+                    .apply(RequestOptions.circleCropTransform())
                     .into(holder.imageView_profile)
                 holder.textView_name.text = destinationUserModel.userName
                 holder.linearLayout_receiver.visibility = View.VISIBLE

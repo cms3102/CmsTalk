@@ -208,7 +208,7 @@ class GroupChatActivity : AppCompatActivity() {
             } else {
                 Glide.with(holder.itemView.context)
                     .load(usersMap[comments[position].uid]?.profileImageUri)
-                    .apply(RequestOptions.centerCropTransform())
+                    .apply(RequestOptions.circleCropTransform())
                     .into(holder.imageView_profile)
                 holder.textView_name.text = usersMap[comments[position].uid]?.userName
                 holder.linearLayout_receiver.visibility = View.VISIBLE

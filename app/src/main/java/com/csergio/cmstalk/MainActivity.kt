@@ -9,12 +9,15 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.iid.FirebaseInstanceId
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.android.synthetic.main.toolbar.*
 
 class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
+        setSupportActionBar(toolbar)
 
         mainActivity_bottomNavigationView.setOnNavigationItemSelectedListener {
             when(it.itemId){
@@ -23,6 +26,7 @@ class MainActivity : AppCompatActivity() {
                         .beginTransaction()
                         .replace(R.id.mainActivity_frameLayout, PeopleFragment())
                         .commit()
+                    toolbar.title = "친구"
                     return@setOnNavigationItemSelectedListener true
                 }
                 R.id.action_chat -> {
@@ -30,6 +34,7 @@ class MainActivity : AppCompatActivity() {
                         .beginTransaction()
                         .replace(R.id.mainActivity_frameLayout, ChatFragment())
                         .commit()
+                    toolbar.title = "대화방"
                     return@setOnNavigationItemSelectedListener true
                 }
                 R.id.action_account -> {
@@ -37,6 +42,7 @@ class MainActivity : AppCompatActivity() {
                         .beginTransaction()
                         .replace(R.id.mainActivity_frameLayout, AccountFragment())
                         .commit()
+                    toolbar.title = "계정 설정"
                     return@setOnNavigationItemSelectedListener true
                 }
             }
@@ -47,6 +53,7 @@ class MainActivity : AppCompatActivity() {
             .beginTransaction()
             .replace(R.id.mainActivity_frameLayout, PeopleFragment())
             .commit()
+        toolbar.title = "친구"
 
         setPushToken()
 

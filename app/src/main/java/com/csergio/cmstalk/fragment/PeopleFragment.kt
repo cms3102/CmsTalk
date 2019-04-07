@@ -11,6 +11,9 @@ import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
+import com.bumptech.glide.load.resource.bitmap.CenterCrop
+import com.bumptech.glide.load.resource.bitmap.RoundedCorners
+import com.bumptech.glide.load.resource.bitmap.TransformationUtils
 import com.bumptech.glide.request.RequestOptions
 import com.csergio.cmstalk.R
 import com.csergio.cmstalk.chat.MessageActivity
@@ -78,9 +81,10 @@ class PeopleFragment:Fragment() {
         }
 
         override fun onBindViewHolder(holder: PeopleFragmentViewHolder, position: Int) {
-            Glide.with(holder.itemView.context)
+            val imageViewContext = holder.itemView.context
+            Glide.with(imageViewContext)
                 .load(userModels[position].profileImageUri)
-                .apply { RequestOptions.circleCropTransform() }
+                .apply(RequestOptions.circleCropTransform())
                 .into(holder.imageView)
 
             holder.textView.text = userModels[position].userName

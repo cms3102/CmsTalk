@@ -98,7 +98,7 @@ class ChatFragment:Fragment() {
                     val userModel = snapshot.getValue(UserModel::class.java)
                     Glide.with(holder.itemView.context)
                         .load(userModel?.profileImageUri)
-                        .apply(RequestOptions.centerCropTransform())
+                        .apply(RequestOptions.circleCropTransform())
                         .into(holder.imageView)
                     holder.textView_title.text = userModel?.userName
                 }
